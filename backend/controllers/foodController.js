@@ -9,11 +9,11 @@ const addFood = async (req, res) => {
         const image = req.file.filename;
 
         const newFood = new foodModel({
-            name,
-            description,
-            price,
-            image,
-            category
+            name: name.trim(),
+            price: Number(price),
+            category: category.trim(),
+            description: description.trim(),
+            image: image
         })
 
         await newFood.save()
@@ -27,8 +27,9 @@ const addFood = async (req, res) => {
     } catch (err) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: err.message,
         });
+        console.log(err)
     }
 }
 
@@ -64,7 +65,13 @@ const removeFood = async (req, res) => {
         }
 
         const imagePath = `uploads/${food.image}`;
-        fs.unlink(imagePath, () => { });
+        fs.unlink(imagePath, (err) => {
+            if (err) {
+                console.log("Error deleting file:", err.message);
+            } else {
+                console.log("File deleted successfully");
+            }
+        });
 
         await foodModel.findByIdAndDelete(req.params.id);
 
