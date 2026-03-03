@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { connectDB } from './config/db.js';
 import foodRouter from './routes/foodRoutes.js';
+import userRoute from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const app = express();
 // middleware
 app.use(express.json());
 app.use(cors());
-app.use("/images", express.static("uploads"));
+
 
 // db connection
 connectDB();
@@ -20,6 +21,8 @@ connectDB();
 
 // api endpoints
 app.use("/api/food",foodRouter);
+app.use("/images", express.static("uploads"));
+app.use("/api/user",userRoute)
 
 app.get("/",(req,res)=>{
     res.send("Api working")

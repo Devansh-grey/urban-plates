@@ -5,7 +5,7 @@ import { assets } from '../../assets/assets'
 import { useNavigate } from 'react-router-dom'
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, addToCart, getTotalCartAmount } = useContext(StoreContext)
+  const { cartItems, food_list, removeFromCart, addToCart, getTotalCartAmount,url } = useContext(StoreContext)
   const navigate = useNavigate();
   const totalAmount = getTotalCartAmount(food_list.filter(item => cartItems[item._id]));
 
@@ -34,7 +34,7 @@ const Cart = () => {
                     {/* Product Info */}
                     <div className="col-span-2 flex items-center gap-6">
                       <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 shadow-sm border border-gray-100">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={url+"/images/"+item.image} alt={item.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-lg font-bold text-gray-900">{item.name}</p>

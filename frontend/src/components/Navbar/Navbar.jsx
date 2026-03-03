@@ -5,9 +5,15 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { StoreContext } from '../../Context/StoreContext';
 
 const Navbar = ({ showLogin, setShowLogin }) => {
-  const { cartItems } = useContext(StoreContext);
+  const { cartItems,token,setToken } = useContext(StoreContext);
   const cartCount = Object.keys(cartItems).length;
   const navigate = useNavigate();
+
+  const logOut = () => {
+    localStorage.removeItem("token")
+    setToken("")
+    navigate("/")
+  }
 
   return (
     // Sticky wrapper with z-index to stay on top
@@ -98,13 +104,52 @@ const Navbar = ({ showLogin, setShowLogin }) => {
             )}
           </div>
 
-          {/* Primary Sign In Button */}
-          <button
-            onClick={() => setShowLogin(true)}
-            className="bg-[#ff5a00] hover:bg-[#e04f00] text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-[0_4px_14px_0_rgba(255,90,0,0.39)] hover:shadow-[0_6px_20px_rgba(255,90,0,0.23)] hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Sign In
-          </button>
+          {/* Profile & Auth Section */}
+{!token ? (
+  <button
+    onClick={() => setShowLogin(true)}
+    className="bg-[#ff5a00] hover:bg-[#e04f00] text-white text-sm font-bold px-8 py-3 rounded-full shadow-[0_10px_20px_rgba(255,90,0,0.2)] hover:shadow-[0_15px_30px_rgba(255,90,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
+  >
+    Sign In
+  </button>
+) : (
+  <div className="relative group">
+    {/* Profile Avatar Trigger */}
+    <div className="flex items-center gap-2 cursor-pointer p-1 pr-3 rounded-full hover:bg-white/50 transition-all border border-transparent hover:border-white/50">
+      <div className="w-10 h-10 rounded-full border-2 border-[#ff5a00] p-0.5 shadow-sm">
+        <img 
+          src={assets.profile_icon} 
+          alt="Profile" 
+          className="w-full h-full rounded-full object-cover bg-gray-100 px-0.75" 
+        />
+      </div>
+      <img src={assets.dropdown_icon} alt="" className="w-2.5 opacity-50 group-hover:rotate-180 transition-transform duration-300" />
+    </div>
+
+    {/* Elegant Dropdown Menu */}
+    <ul className="absolute right-0 mt-2 w-52 bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-white/50 py-3 flex flex-col gap-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right scale-95 group-hover:scale-100 z-50">
+      
+      <li 
+        // onClick={() => navigate('/myorders')}
+        className="flex items-center gap-3 px-5 py-3 hover:bg-[#ff5a00]/5 cursor-pointer transition-colors group/item"
+      >
+        <img src={assets.bag_icon} alt="" className="w-5 opacity-70 group-hover/item:opacity-100" />
+        <p className="text-sm font-bold text-gray-700 group-hover/item:text-[#ff5a00]">Orders</p>
+      </li>
+
+      <div className="h-px bg-gray-100 mx-4 my-1"></div>
+
+      <li 
+        onClick={logOut}
+        className="flex items-center gap-3 px-5 py-3 hover:bg-red-50 cursor-pointer transition-colors group/item"
+      >
+        <img src={assets.logout_icon} alt="" className="w-5 opacity-70 group-hover/item:opacity-100" />
+        <p className="text-sm font-bold text-gray-700 group-hover/item:text-red-500">Logout</p>
+      </li>
+      
+    </ul>
+  </div>
+)}
         </div>
       </nav>
     </header>

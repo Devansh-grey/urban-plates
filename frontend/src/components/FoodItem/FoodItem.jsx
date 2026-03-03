@@ -4,7 +4,7 @@ import { assets } from '../../assets/assets';
 import { StoreContext } from '../../Context/StoreContext';
 
 const FoodItem = ({ id, name, desc, price, image }) => {
-    const { addToCart, removeFromCart, cartItems } = useContext(StoreContext);
+    const { addToCart, removeFromCart, cartItems,url } = useContext(StoreContext);
 
     return (
         // Clean white card that sits on the cream background
@@ -13,7 +13,7 @@ const FoodItem = ({ id, name, desc, price, image }) => {
             {/* Image Section */}
             <div className="relative overflow-hidden aspect-4/3">
                 <img 
-                    src={image} 
+                    src={url+"/images/"+image} 
                     alt={name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                 />

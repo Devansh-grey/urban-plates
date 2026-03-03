@@ -1,14 +1,52 @@
 
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
+import axios from 'axios'
 import { assets } from '../../assets/assets'
+import { StoreContext } from '../../Context/StoreContext';
 
 const LoginPopup = ({ setShowLogin }) => {
-    const [currState, setCurrState] = useState("Sign Up");
+    const [currState, setCurrState] = useState("Login");
+    const {url,token,setToken} = useContext(StoreContext)
+    const [data,setData]=useState({
+        name:"",
+        email:"",
+        password:""
+    })
+    const onChangeHandler= (event) =>{
+         const name = event.target.name;
+        const value = event.target.value;
+        setData(data => ({ ...data, [name]: value }))
+    }
+    const onSubmitHandler = async (event) =>{
+       event.preventDefault();
+       let newUrl = url
+       if (currState==="Login") {
+        newUrl += "/api/user/login"
+       } else {
+        newUrl += "/api/user/register"
+       }
+       try {
+        const response = await axios.post(newUrl,data)
+        if (response.data.success) {
+            setToken(response.data.token)
+            localStorage.setItem("token",response.data.token)
+            setShowLogin(false)
+        }else{
+            alert(response.data.message)
+        }
+       } catch (error) {
+        alert(error.response?.data?.message || "Something went wrong");
+        console.log(error);
+       }
+
+    }
 
     return (
         <div className='fixed inset-0 z-1000 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 animate-in fade-in duration-300'>
             
-            <form className="bg-white w-full max-w-112.5 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+            <form
+            onSubmit={onSubmitHandler}
+            className="bg-white w-full max-w-112.5 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
                 
                 {/* Header Section */}
                 <div className="bg-[#fffaf5] px-8 py-8 flex justify-between items-center border-b border-gray-100">
@@ -31,6 +69,9 @@ const LoginPopup = ({ setShowLogin }) => {
                         {currState === "Sign Up" && (
                             <div className="relative">
                                 <input 
+                                    onChange={onChangeHandler}
+                                    name='name'
+                                    value={data.name}
                                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-[#ff5a00] focus:ring-4 focus:ring-[#ff5a00]/10 transition-all text-gray-900 font-medium placeholder:text-gray-400"
                                     type="text" 
                                     placeholder='Full Name' 
@@ -39,18 +80,33 @@ const LoginPopup = ({ setShowLogin }) => {
                             </div>
                         )}
                         <input 
+                            onChange={onChangeHandler}
+                            name='email'
+                            value={data.email}
                             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-[#ff5a00] focus:ring-4 focus:ring-[#ff5a00]/10 transition-all text-gray-900 font-medium placeholder:text-gray-400"
                             type="email" 
                             placeholder='Email address' 
                             required 
                         />
                         <input 
+                            onChange={onChangeHandler}
+                            name='password'
+                            value={data.password}
                             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-[#ff5a00] focus:ring-4 focus:ring-[#ff5a00]/10 transition-all text-gray-900 font-medium placeholder:text-gray-400"
                             type="password" 
                             placeholder='Password' 
                             required 
                         />
                     </div>
+                    {/* Terms & Condition */}{currState==="Sign Up"&&(
+
+                        <div className="flex items-start gap-3 mt-2">
+                        <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-300 text-[#ff5a00] focus:ring-[#ff5a00]" required />
+                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                            I agree to the <span className="text-[#ff5a00] font-bold cursor-pointer hover:underline">Terms of Service</span> and <span className="text-[#ff5a00] font-bold cursor-pointer hover:underline">Privacy Policy</span>.
+                        </p>
+                    </div>
+                    )}
 
                     <button 
                         type="submit"
@@ -73,13 +129,6 @@ const LoginPopup = ({ setShowLogin }) => {
                         Google
                     </button>
 
-                    {/* Terms & Condition */}
-                    <div className="flex items-start gap-3 mt-2">
-                        <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-300 text-[#ff5a00] focus:ring-[#ff5a00]" required />
-                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                            I agree to the <span className="text-[#ff5a00] font-bold cursor-pointer hover:underline">Terms of Service</span> and <span className="text-[#ff5a00] font-bold cursor-pointer hover:underline">Privacy Policy</span>.
-                        </p>
-                    </div>
                 </div>
 
                 {/* Footer Toggle */}
