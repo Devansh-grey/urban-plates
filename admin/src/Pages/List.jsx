@@ -87,7 +87,7 @@ const List = () => {
 
                                 {/* Price */}
                                 <p className='text-xl font-black text-gray-900'>
-                                    <span className='text-[#ff5a00] text-sm mr-0.5'>$</span>{item.price}
+                                    <span className='text-[#ff5a00] text-sm mr-0.5'>₹</span>{item.price}
                                 </p>
 
                                 {/* Action */}

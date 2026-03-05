@@ -122,7 +122,7 @@ const Add = () => {
                                 </select>
                             </div>
                             <div className='flex flex-col gap-2'>
-                                <label className='text-xs font-black text-gray-400 uppercase tracking-widest ml-1'>Price ($)</label>
+                                <label className='text-xs font-black text-gray-400 uppercase tracking-widest ml-1'>Price (₹)</label>
                                 <input
                                 name='price'
                                 value={data.price}

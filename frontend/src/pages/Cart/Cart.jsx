@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 const Cart = () => {
   const { cartItems, food_list, removeFromCart, addToCart, getTotalCartAmount,url } = useContext(StoreContext)
   const navigate = useNavigate();
-  const totalAmount = getTotalCartAmount(food_list.filter(item => cartItems[item._id]));
+  const totalAmount = getTotalCartAmount();
 
   return (
     // min-h-screen ensures the page takes up full height, pushing the footer down
@@ -43,7 +43,7 @@ const Cart = () => {
                     </div>
 
                     {/* Price */}
-                    <p className="text-gray-600 font-semibold hidden md:block">${item.price}</p>
+                    <p className="text-gray-600 font-semibold hidden md:block">₹{item.price}</p>
 
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-4 bg-gray-50 w-fit px-3 py-2 rounded-full border border-gray-100">
@@ -62,7 +62,7 @@ const Cart = () => {
 
                     {/* Total */}
                     <p className="text-right text-lg font-bold text-[#ff5a00] hidden md:block">
-                      ${item.price * cartItems[item._id]}
+                      ₹{item.price * cartItems[item._id]}
                     </p>
                   </div>
                 )
@@ -93,16 +93,16 @@ const Cart = () => {
               <div className="flex flex-col gap-5 text-gray-600 font-medium">
                 <div className="flex justify-between items-center">
                   <p>Subtotal</p>
-                  <p className="text-gray-900">${totalAmount}</p>
+                  <p className="text-gray-900">₹{totalAmount}</p>
                 </div>
                 <div className="flex justify-between items-center">
                   <p>Delivery Fee</p>
-                  <p className="text-gray-900">${totalAmount > 0 ? 2 : 0}</p>
+                  <p className="text-gray-900">₹{totalAmount > 0 ? 2 : 0}</p>
                 </div>
                 <hr className="border-gray-100 my-2" />
                 <div className="flex justify-between items-center text-xl font-extrabold text-gray-900">
                   <p>Grand Total</p>
-                  <p className="text-[#ff5a00]">${totalAmount > 0 ? totalAmount + 2 : 0}</p>
+                  <p className="text-[#ff5a00]">₹{totalAmount > 0 ? totalAmount + 2 : 0}</p>
                 </div>
               </div>
 

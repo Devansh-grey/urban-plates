@@ -11,7 +11,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-[18%] min-h-screen border-r border-gray-100 bg-white p-6 flex flex-col gap-8 sticky top-20.25">
+    <div className="w-[18%] border-r border-gray-100 bg-white p-6 flex flex-col gap-8 top-20.25">
       
       <div className="px-4">
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Menu</h3>

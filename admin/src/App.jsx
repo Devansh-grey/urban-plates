@@ -10,13 +10,18 @@ import Orders from './Pages/Orders'
 
 const App = () => {
   return (
-    <div className="min-h-screen bg-[#fffaf5]">
+    // Fixed height of screen and hidden overflow to prevent the whole page from scrolling
+    <div className="h-screen flex flex-col bg-[#fffaf5] overflow-hidden">
       <ToastContainer />
       <Navbar />
-      <div className="flex">
+      
+      {/* This container takes up the remaining height under the navbar */}
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <div className="flex-1 p-8 lg:p-12">
-          <Routes >
+        
+        {/* Only this area will scroll */}
+        <div className="flex-1 p-8 lg:p-12 overflow-y-auto">
+          <Routes>
             <Route path='/admin/add' element={<Add />} />
             <Route path='/admin/list' element={<List />} />
             <Route path='/admin/orders' element={<Orders />} />

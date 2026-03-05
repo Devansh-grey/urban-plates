@@ -62,7 +62,7 @@ const FoodItem = ({ id, name, desc, price, image }) => {
                 
                 <div className="flex items-center justify-between mt-auto pt-2">
                     <p className="text-[#ff5a00] font-black text-2xl flex items-start">
-                        <span className="text-sm mt-1 mr-0.5">$</span>{price}
+                        <span className="text-sm mt-1 mr-0.5">₹</span>{price}
                     </p>
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full">
                         Fresh
