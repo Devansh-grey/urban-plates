@@ -149,7 +149,13 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
 
-    await orderModel.findByIdAndUpdate(orderId, { status });
+    const order = await orderModel.findByIdAndUpdate(orderId, { status },{returnDocument:'after'});
+
+    clients.forEach(client =>{
+      if (client.userId === order.userId.toString()) {
+        client.res.write(`data: ${JSON.stringify(order)}\n\n`)
+      }
+    })
 
     res.json({
       success: true,
@@ -163,4 +169,25 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-export { placeOrder, verifyOrder, userOrders,listOrders,updateOrderStatus };
+let clients =[]
+const orderStatusStream =(req,res) => {
+  res.setHeader("Content-Type","text/event-stream")
+  res.setHeader("Cache-Control","no-cache")
+  res.setHeader("Connection", "keep-alive")
+  res.flushHeaders();
+
+  const newClient ={
+    userId:req.user._id.toString(),
+    res
+  };
+  clients.push(newClient);
+
+  req.on("close",()=>{
+    clients = clients.filter(
+      client => client.res !== res
+    )
+  })
+
+}
+
+export { placeOrder, verifyOrder, userOrders,listOrders,updateOrderStatus,orderStatusStream };

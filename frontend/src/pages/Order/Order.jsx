@@ -10,10 +10,10 @@ const Order = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const statusColors = {
-  "Food preparing": "bg-yellow-400",
-  "Out for delivery": "bg-blue-400",
-  "Delivered": "bg-green-500"
-};
+    "Food preparing": "bg-yellow-400",
+    "Out for delivery": "bg-blue-400",
+    "Delivered": "bg-green-500"
+  };
 
   const getOrders = useCallback(async () => {
     if (!token) return;
@@ -42,14 +42,23 @@ const Order = () => {
     }
   }, [token, url]);
 
- useEffect(() => {
+  useEffect(() => {
+    if (!token) return;
+    const eventSource = new EventSource(`${url}/api/order/stream?token=${token}`)
+    eventSource.onmessage = (event) => {
+      const updatedOrder = JSON.parse(event.data)
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === updatedOrder._id ? updatedOrder : order
+        )
+      )
+    }
+    return () =>{
+      eventSource.close()
+    }
+  }, [url,token]);
+  useEffect(() => {
   getOrders();
-
-  const interval = setInterval(() => {
-    getOrders();
-  }, 5000); // refresh every 5 seconds
-
-  return () => clearInterval(interval);
 }, [getOrders]);
 
   if (loading) {
