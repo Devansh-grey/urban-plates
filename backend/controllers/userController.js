@@ -1,6 +1,7 @@
 import userModel from "../models/userModel.js";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { OAuth2Client } from "google-auth-library";
 import validator from 'validator'
 
 const loginUser = async (req, res) => {
@@ -68,4 +69,54 @@ const registerUser = async (req, res) => {
     }
 }
 
-export { loginUser, registerUser }
+// with google
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleLogin = async (req, res) => {
+    try {
+        const { token } = req.body
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        })
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+        let user = await userModel.findOne({ email })
+        if (!user) {
+            const user = new userModel({
+                name,
+                email,
+            })
+        }
+        const jwtToken = createToken(user._id);
+        res.json({
+      success: true,
+      token: jwtToken
+    });
+
+
+    } catch (error) {
+        res.status(500).json({
+      success: false,
+      message: "Google login failed"
+    });
+    }
+}
+
+const getUser = async (req, res) => {
+    try {
+
+        const user = await userModel.findById(req.user._id).select("-password")
+        res.json({
+            success: true,
+            data: user
+        })
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message
+        })
+    }
+
+}
+
+export { loginUser, registerUser, getUser,googleLogin }

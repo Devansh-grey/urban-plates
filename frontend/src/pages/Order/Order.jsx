@@ -2,9 +2,17 @@ import React, { useContext, useEffect, useState, useCallback } from "react";
 import { StoreContext } from "../../Context/StoreContext";
 import { assets } from "../../assets/assets";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
 
 const Order = () => {
   const { token, url } = useContext(StoreContext);
+  const location = useLocation()
+  useEffect(() => {
+  if (location.state?.paymentSuccess) {
+    toast.success("Payment successful 🎉");
+  }
+}, []);
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);

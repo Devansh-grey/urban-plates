@@ -5,10 +5,13 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
+import loadRazorpay from '../../utils/razorpay';
+import toast from "react-hot-toast";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, food_list, cartItems, token, url } = useContext(StoreContext)
+  const { getTotalCartAmount, food_list, cartItems, token, url, clearCart } = useContext(StoreContext)
   const totalAmount = getTotalCartAmount();
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
@@ -27,25 +30,52 @@ const PlaceOrder = () => {
     const value = event.target.value
     setData(prev => ({ ...prev, [name]: value }))
   }
-  const placeOrder = async (event) => {
-    event.preventDefault()
-    let orderItems = []
-    food_list.forEach((item) => {
-      if (cartItems[item._id] > 0) {
-        let itemInfo = { ...item }
-        itemInfo.quantity = cartItems[item._id]
-        orderItems.push(itemInfo)
-      }
-    })
-    let orderData = {
-      address: data,
-      items: orderItems,
-      amount: totalAmount + 2
-    }
 
-    let response = await axios.post(`${url}/api/order/place`, orderData, { headers: { Authorization: `Bearer ${token}` } })
-    if (response.data.success) {
-      const { razorpayOrder, orderId } = response.data
+
+  const placeOrder = async (event) => {
+    event.preventDefault();
+
+    if (loading) return;
+    setLoading(true);
+
+    try {
+
+      const res = await loadRazorpay();
+
+      if (!res) {
+        toast.error("Razorpay failed to load");
+        setLoading(false);
+        return;
+      }
+
+      const orderItems = food_list
+        .filter(item => cartItems[item._id] > 0)
+        .map(item => ({
+          ...item,
+          quantity: cartItems[item._id]
+        }));
+
+      const orderData = {
+        address: data,
+        items: orderItems,
+        amount: totalAmount + 2
+      };
+
+      const response = await axios.post(
+        `${url}/api/order/place`,
+        orderData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!response.data.success) {
+        toast.error("Order creation failed");
+        setLoading(false);
+        return;
+      }
+
+      const { razorpayOrder, orderId } = response.data;
+      toast.loading("Opening payment gateway...");
+
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: razorpayOrder.amount,
@@ -55,25 +85,44 @@ const PlaceOrder = () => {
         order_id: razorpayOrder.id,
 
         handler: async function (paymentResponse) {
+          try {
 
-          const verifyRes = await axios.post(
-            `${url}/api/order/verify`,
-            { ...paymentResponse, orderId },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+            const verifyRes = await axios.post(
+              `${url}/api/order/verify`,
+              { ...paymentResponse, orderId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-          if (verifyRes.data.success) {
-            alert("Payment Successful 🎉");
-            navigate("/myorders");
-            window.location.reload();
+            if (verifyRes.data.success) {
+              navigate("/myorders", { state: { paymentSuccess: true } });
+              clearCart()
+            } else {
+              toast.error("Payment verification failed");
+            }
+
+          } catch (error) {
+            console.error(error);
+            toast.error("Verification error");
           }
         }
       };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    }
 
-  }
+      const rzp = new window.Razorpay(options);
+      toast.dismiss();
+
+      rzp.on("payment.failed", function () {
+        toast.error("Payment failed");
+        setLoading(false);
+      });
+
+      rzp.open();
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     if (!token) {
       navigate("/")
@@ -161,11 +210,11 @@ const PlaceOrder = () => {
             <div className="flex flex-col gap-6 text-gray-600 font-medium">
               <div className="flex justify-between items-center text-lg">
                 <p>Subtotal</p>
-                <p className="text-gray-900 font-bold">${totalAmount}</p>
+                <p className="text-gray-900 font-bold">₹{totalAmount}</p>
               </div>
               <div className="flex justify-between items-center text-lg">
                 <p>Delivery Fee</p>
-                <p className="text-gray-900 font-bold">${totalAmount > 0 ? 2 : 0}</p>
+                <p className="text-gray-900 font-bold">₹{totalAmount > 0 ? 2 : 0}</p>
               </div>
 
               {/* Soft Decorative Divider */}
@@ -173,15 +222,16 @@ const PlaceOrder = () => {
 
               <div className="flex justify-between items-center text-2xl font-black text-gray-900">
                 <p>Grand Total</p>
-                <p className="text-[#ff5a00]">${totalAmount > 0 ? totalAmount + 2 : 0}</p>
+                <p className="text-[#ff5a00]">₹{totalAmount > 0 ? totalAmount + 2 : 0}</p>
               </div>
             </div>
 
             <button
+              disabled={loading}
               type='submit'
               className="w-full mt-10 bg-[#ff5a00] hover:bg-[#e04f00] text-white py-5 rounded-2xl font-bold text-lg shadow-[0_12px_24px_rgba(255,90,0,0.25)] transition-all active:scale-95 uppercase tracking-wider"
             >
-              Proceed to Payment
+              {loading ? "Processing..." : "Place Order"}
             </button>
 
             {/* Promo Code Section - styled to feel wider */}
